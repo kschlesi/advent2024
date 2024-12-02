@@ -20,7 +20,7 @@ def is_safe(report):
     
     # check that all differences are the same sign
     sign_condition = [d == abs(d) for d in differences]
-    if not len(list(set(sign_condition))) == 1:
+    if not len(list(set(sign_condition))) <= 1: # reports of length 1 are safe
         return False
 
     # check that all differences meet the size limits
