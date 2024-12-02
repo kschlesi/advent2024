@@ -1,15 +1,15 @@
 
-def is_safe(report, dampen = False):
-    '''determines whether a report (list of integer levels) is safe (boolean True) or unsafe (False)
-       if dampen = True, also checks for each sub-report of length n-1
+def safety_check(report, dampen = False):
+    '''determines whether a report (list of n integer levels) is safe (boolean True) or unsafe (False)
+       if dampen = True, also checks each sub-report of length n-1 created by removing one level
     '''
-    is_safe_full = _is_safe(report)
+    is_safe_full = is_safe(report)
     if dampen and not is_safe_full:
-        return any([_is_safe(report[:i]+report[i+1:]) for i in range(len(report))])
+        return any([is_safe(report[:i]+report[i+1:]) for i in range(len(report))])
     return is_safe_full   
 
 
-def _is_safe(report):
+def is_safe(report):
     '''determines whether a report (list of integer levels) is safe (boolean True) or unsafe (False)
        To be safe, both of the following must be true:
        - The levels are either all increasing or all decreasing.
@@ -38,4 +38,4 @@ if __name__ == "__main__":
         reports = [[int(level) for level in row.split(' ')] for row in f]
         
     # determine safety
-    print(sum([is_safe(report, True) for report in reports]))
+    print(sum([safety_check(report, True) for report in reports]))
