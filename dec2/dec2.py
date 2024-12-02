@@ -3,10 +3,10 @@ def safety_check(report, dampen = False):
     '''determines whether a report (list of n integer levels) is safe (boolean True) or unsafe (False)
        if dampen = True, also checks each sub-report of length n-1 created by removing one level
     '''
-    is_safe_full = is_safe(report)
-    if dampen and not is_safe_full:
-        return any([is_safe(report[:i]+report[i+1:]) for i in range(len(report))])
-    return is_safe_full   
+    safe = is_safe(report)
+    if dampen and not safe:
+        safe = any([is_safe(report[:i]+report[i+1:]) for i in range(len(report))])
+    return safe   
 
 
 def is_safe(report):
