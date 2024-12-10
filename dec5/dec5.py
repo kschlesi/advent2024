@@ -12,6 +12,38 @@ def check_output(example, rules):
         return int(example[math.floor(len(example)/2) + len(example)%2 - 1])
     return 0
 
+def rules_sort(example, rules):
+    return _sort(example, rules)
+
+def _sort(input, rules):
+    # recursive mergesort
+    if len(input) <= 1:
+        return input
+    elif len(input) == 2:
+        return (input if is_before(input[0], input[1], rules) else input[::-1])
+    else:
+        half = math.floor(len(input)/2) + len(input)%2 - 1
+        return _merge(_sort(input[:half], rules), _sort(input[half:], rules), rules)
+
+def _merge(input1, input2, rules):
+    i1 = 0
+    i2 = 0
+    merged = []
+    while i1 < len(input1) and i2 < len(input2):
+        if is_before(input1[i1], input2[i2], rules):
+            merged.append(input1[i1])
+            i1 = i1+1
+        else:
+            merged.append(input2[i2])
+            i2 = i2+1
+    if i1 < len(input1):
+        merged.extend(input1[i1:])
+    if i2 < len(input2):
+        merged.extend(input2[i2:])
+    return merged        
+
+
+
 if __name__ == "__main__":
 
     # read data
@@ -30,6 +62,14 @@ if __name__ == "__main__":
     output = [check_output(example, rules) for example in examples]
     print(output)
     print(sum(output))
+
+    # sort each example
+    sorts = [check_output(rules_sort(example, rules), rules) for example, check in zip(examples, output) if check == 0]
+    print(sorts)
+    print(sum(sorts))
+
+
+
         
         
 
