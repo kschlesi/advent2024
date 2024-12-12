@@ -1,8 +1,40 @@
 import numpy as np
 
-def find_guard(map):
-    guard_directions = ['^','>','v','<']
-    return [(dir, x) for dir in guard_directions for x in np.argwhere(map==dir)][0]
+class Map(np.ndarray):
+    def __new__(cls, map_array):
+        obj = np.asarray(map_array).view(cls)
+        obj.length, obj.width = map_array.shape
+        # obj.guard_state = obj.find_guard()
+        return obj
+    
+    def find_guard(self):
+        guard_directions = ['^','>','v','<']
+        return [(dir, x) for dir in guard_directions for x in np.argwhere(self==dir)][0]
+    
+    
+    
+
+
+
+
+
+
+class guard_state():
+
+
+
+
+def next_direction(dir):
+    directions = ['^','>','v','<']
+    return directions[(directions.index(dir) + 1) % len(directions)]
+
+def previous_direction(dir):
+    directions = ['^','>','v','<']
+    return directions[(directions.index(dir) - 1) % len(directions)]
+
+def take_step()
+    
+
 
 def patrol_step(map):
     dir, guard = find_guard(map)
@@ -65,7 +97,7 @@ if __name__ == "__main__":
     # read data into array
     with open('input.txt','r') as f:
         rows = [[c for c in line.strip()] for line in f]
-    map = np.array(rows)
+    map = Map(rows)
     length, width = map.shape
     print(map)
     print(map.shape)
@@ -88,34 +120,27 @@ if __name__ == "__main__":
     # (3) guard's current column or row is ahead or behind of that at earlier step N, as appropriate
     
     # FINDING REPEAT OPPORTUNITIES:
-    # for all steps with dir '^' and guard location [x, y]:
-    # find previous steps with direction '>' and location [x, y'>=y]
-    opps = [ (j, dirj, guardj, i, diri, guardi) 
-                for j, (dirj, guardj) in enumerate(guard_path) 
-                for i, (diri, guardi) in enumerate(guard_path) 
-                 if i<j and (
-                    (dirj=='^' and diri=='>' and guardi[0]==guardj[0] and guardi[1]>=guardj[1]) or
-                    (dirj=='>' and diri=='v' and guardi[0]>=guardj[0] and guardi[1]==guardj[1]) or
-                    (dirj=='v' and diri=='<' and guardi[0]==guardj[0] and guardi[1]<=guardj[1]) or
-                    (dirj=='<' and diri=='^' and guardi[0]<=guardj[0] and guardi[1]==guardj[1])
+    # for all steps with dir '<' and guard location [x, y]:
+    # find subsequent steps with direction 'v' and location [x, y'>=y]
+    path_length = len(guard_path)
+    print(path_length)
+    opps = [ (i, guard_path[i][0], [guard_path[i][1][0], guard_path[i][1][1]], j, guard_path[j][0], [guard_path[j][1][0], guard_path[j][1][1]]) 
+                for i in range(path_length) 
+                for j in range(i+1, path_length) 
+                if (
+                    (guard_path[i][0]=='<' and guard_path[j][0]=='v' and guard_path[i][1][0]==guard_path[j][1][0] and guard_path[i][1][1]<=guard_path[j][1][1] 
+                     and not '#' in (list(map[guard_path[j][1][0]+1, guard_path[j][1][1]]) + list(map[guard_path[j][1][0], guard_path[i][1][1]:guard_path[j][1][1]])) 
+                    ) or
+                    (guard_path[i][0]=='>' and guard_path[j][0]=='^' and guard_path[i][1][0]==guard_path[j][1][0] and guard_path[i][1][1]>=guard_path[j][1][1]
+                    ) or
+                    (guard_path[i][0]=='v' and guard_path[j][0]=='>' and guard_path[i][1][0]>=guard_path[j][1][0] and guard_path[i][1][1]==guard_path[j][1][1]
+                    ) or
+                    (guard_path[i][0]=='^' and guard_path[j][0]=='<' and guard_path[i][1][0]<=guard_path[j][1][0] and guard_path[i][1][1]==guard_path[j][1][1]
+                    )
                 )       
             ]
     print(len(opps))
-
-    # for all steps with dir '>' and guard location [x, y]:
-    # find previous steps with direction 'v' and location [x'>=x, y]
-    # oppsE = [ j for j, (dirj, guardj) in enumerate(guard_path) for i, (diri, guardi) in enumerate(guard_path) if i<j and dirj=='>' and diri=='v' and guardi[0]>=guardj[0] and guardi[1]==guardj[1] ]
-    # print(len(oppsE))
-
-    # for all steps with dir 'v' and guard location [x, y]:
-    # find previous steps with direction '<' and location [x, y'<=y]
-    # oppsS = [ j for j, (dirj, guardj) in enumerate(guard_path) for i, (diri, guardi) in enumerate(guard_path) if i<j and dirj=='v' and diri=='<' and guardi[0]==guardj[0] and guardi[1]<=guardj[1] ]
-    # print(len(oppsS))
-
-    # for all steps with dir '<' and guard location [x, y]:
-    # find previous steps with direction '^' and location [x'<=x, y]
-    # oppsW = [ j for j, (dirj, guardj) in enumerate(guard_path) for i, (diri, guardi) in enumerate(guard_path) if i<j and dirj=='<' and diri=='^' and guardi[0]<=guardj[0] and guardi[1]==guardj[1] ]
-    # print(len(oppsW))
+    print(len(list(set(['{}|{}|{}'.format(opp[4], opp[5][0], opp[5][1]) for opp in opps])))) # 800 the old way
 
     # print(len(list(set(opps))))
     print(opps[:10])
@@ -127,6 +152,15 @@ if __name__ == "__main__":
     #         for all existing obstacles at locations [x''=x-1, y''<=y]: treat as a new step with direction '^' and location [x, y'']. repeat search.
     #  
 
+
+    def search(stepN):
+        find all stepM such that:
+            - M > N
+            - turn(M) pointsAt N (without blocks!)
+            - step(M) != '#'
+        for each '#' along the trailing line of stepN:
+            - construct stepP
+            - search(stepP) 
 
 
     
