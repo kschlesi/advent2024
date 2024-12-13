@@ -177,4 +177,4 @@ if __name__ == "__main__":
                     visited.update({ guard.__str__(): True })
                 print('complete, no loop')
 
-    print(len(opps))
+    print(len(opps)) # 1972 is the answer (1625 from last attempt)
