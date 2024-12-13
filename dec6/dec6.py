@@ -158,31 +158,23 @@ if __name__ == "__main__":
 
     # part 2
     opps = {}
-    searched = {}
-    for n, guard_n in enumerate(guard_path):
-        opps, searched = map.loop_opportunity_search(n, guard_n, guard_path, opps, searched)
-        
+    for n, opp in enumerate(guard_path): 
+        if n > 0 and n < len(guard_path)-1:
+            print('{}/{}'.format(n, len(guard_path)-1))
+            test_map = Map(rows)
+            guard = test_map.find_guard()
+            if opp.x==guard.x and opp.y==guard.y:
+                print('initial position, skipping')
+            else:
+                test_map[opp.x, opp.y] = '#'        # place a single obstacle 
+                visited = { guard.__str__(): True } # initiate list of locations visited
+                while test_map.in_bounds(guard.x, guard.y):
+                    guard = test_map.patrol_step()
+                    if guard.__str__() in visited:  # loop!
+                        print('loop detected!')
+                        opps.update({'{}|{}'.format(opp.x, opp.y): True})
+                        break
+                    visited.update({ guard.__str__(): True })
+                print('complete, no loop')
+
     print(len(opps))
-
-
-    # def search(stepN):
-    #     find all stepM such that:
-    #         - M > N
-    #         - turn(M) pointsAt N (without blocks!)
-    #         - step(M) != '#'
-    #     for each '#' along the trailing line of stepN:
-    #         - construct stepP
-    #         - search(stepP) 
-
-    # # in order to create a loop, the path must repeat.
-    # # this means the guard is in the same cell they were in earlier and facing the same direction.
-    # # opportunites to create this with a single obstruction occur when:
-    # # (1) guard is in the same row or column they were in at earlier step N
-    # # (2) guard's current direction + 90 degrees is the same as the direction they were facing at earlier step N
-    # # (3) guard's current column or row is ahead or behind of that at earlier step N, as appropriate
-    # # .....OR it can be one turn away from that spot Dx
-    # # for all steps with guard location [x, y]:
-    # #     if direction '>': 
-    # #         find subsequent steps with direction '^' and location [x, y'<=y]. these are candidates
-    # #         for all existing obstacles at locations [x''=x-1, y''<=y]: treat as a new step with direction '^' and location [x, y'']. repeat search.
-    # #  
